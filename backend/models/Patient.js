@@ -7,7 +7,7 @@ const PatientSchema = new mongoose.Schema({
   sex: { type: String, default: '' },
   status: {
     type: String,
-    enum: ['waiting', 'in-triage', 'triaged'],
+    enum: ['waiting', 'in-triage', 'triaged', 'done'],
     default: 'waiting'
   },
   triageLevel: { type: String, default: null },

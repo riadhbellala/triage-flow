@@ -131,11 +131,28 @@ router.put('/:id/upgrade', auth, async (req, res) => {
     const { newLevel } = req.body;
     const patient = await Patient.findByIdAndUpdate(
       req.params.id,
-      { triageLevel: newLevel, degraded: false },
+      { $set: { triageLevel: newLevel, degraded: false } },
       { new: true }
     );
     res.json({ success: true, patient });
   } catch (err) {
+    console.error('Upgrade Error:', err);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// Mark patient as seen by specialist → removes from queue
+router.put('/:id/done', auth, async (req, res) => {
+  try {
+    const patient = await Patient.findByIdAndUpdate(
+      req.params.id,
+      { $set: { status: 'done', doneAt: new Date() } },
+      { new: true }
+    );
+    if (!patient) return res.status(404).json({ success: false, message: 'Patient not found' });
+    res.json({ success: true, patient });
+  } catch (err) {
+    console.error('Done Error:', err);
     res.status(500).json({ success: false, message: 'Server error' });
   }
 });

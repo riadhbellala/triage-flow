@@ -18,9 +18,13 @@ import {
 
 /* ── Staff nav items ─────────────────────────────────── */
 const NAV_ITEMS = [
-  { to: '/dashboard-generalist', label: "File d'attente", icon: LayoutDashboard },
-  { to: '/triage-setup', label: 'Nouveau triage',  icon: ClipboardList },
+  { to: '/dashboard-generalist', label: "File d'attente",   icon: LayoutDashboard, roles: ['staff','admin'] },
+  { to: '/triage-setup',         label: 'Nouveau triage',   icon: ClipboardList,   roles: ['staff','admin'] },
+  { to: '/dashboard-specialist', label: 'File spécialiste', icon: Stethoscope,     roles: ['specialist','admin'] },
 ];
+
+// Routes that should render full-bleed (no max-w wrapper)
+const FULL_BLEED_ROUTES = ['/dashboard-specialist'];
 
 /* ── Staff shell ─────────────────────────────────────── */
 const StaffShell = ({ children }) => {
@@ -92,7 +96,7 @@ const StaffShell = ({ children }) => {
 
         {/* ── Tab nav ── */}
         <nav className="shrink-0 flex items-center gap-1 px-4 py-2 bg-card border-b border-border overflow-x-auto">
-          {NAV_ITEMS.map(({ to, label, icon: Icon }) => {
+          {NAV_ITEMS.filter(item => item.roles.includes(doctor?.role)).map(({ to, label, icon: Icon, roles }) => {
             const active = location.pathname === to;
             return (
               <Link
@@ -119,9 +123,13 @@ const StaffShell = ({ children }) => {
 
         {/* ── Page content ── */}
         <main className="flex-1 overflow-y-auto">
-          <div className="max-w-5xl mx-auto w-full px-4 md:px-8 py-8 pb-20">
-            {children}
-          </div>
+          {FULL_BLEED_ROUTES.includes(location.pathname) ? (
+            children
+          ) : (
+            <div className="max-w-5xl mx-auto w-full px-4 md:px-8 py-8 pb-20">
+              {children}
+            </div>
+          )}
         </main>
       </div>
 

@@ -116,4 +116,15 @@ export const rescorePatient = async (patient) => {
   return { score: data.score, degraded: data.degraded };
 };
 
+// Mark patient as seen (specialist dismisses from queue)
+export const markPatientDone = async (patientId) => {
+  const res  = await fetch(`${BASE}/patients/${patientId}/done`, {
+    method:  'PUT',
+    headers: authHeaders(),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error('Mark done failed');
+  return data.patient;
+};
+
 export const loginUser = async (email, password) => loginDoctor(email, password);
