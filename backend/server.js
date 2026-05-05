@@ -25,8 +25,8 @@ const corsOptions = {
     optionsSuccessStatus: 204,
 };
 
-app.use(cors(corsOptions));
-app.options(/.*/, cors(corsOptions));
+app.use(cors());
+//app.options(/.*/, cors(corsOptions));
 
 // Connect to MongoDB
 console.log('Attempting MongoDB connection...');
