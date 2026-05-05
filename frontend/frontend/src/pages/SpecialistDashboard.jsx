@@ -36,7 +36,7 @@ const SpecialistDashboard = () => {
   const fetchPatients = async () => {
     try {
       const patients = await getTriagedPatients();
-      setTriagedPatients(patients);
+      setTriagedPatients(Array.isArray(patients) ? patients : []);
     } catch (e) {
       console.error('Failed to fetch triaged patients:', e);
     }
@@ -46,9 +46,11 @@ const SpecialistDashboard = () => {
     setIsRescoring(true);
     try {
       const updated = await rescorePatients();
-      setTriagedPatients(prev =>
-        prev.map(p => {
-          const u = updated.find((item) => item._id === p._id);
+      setTriagedPatients(prev => {
+        const safePrev = Array.isArray(prev) ? prev : [];
+        const safeUpdated = Array.isArray(updated) ? updated : [];
+        return safePrev.map(p => {
+          const u = safeUpdated.find((item) => item._id === p._id);
           if (!u) return p;
           if (u.degraded && !p.degraded) {
             setAlerts(prevAlerts => [...prevAlerts, {
@@ -62,8 +64,8 @@ const SpecialistDashboard = () => {
             }]);
           }
           return { ...p, ...u };
-        }).sort((a, b) => (b.score || 0) - (a.score || 0))
-      );
+        }).sort((a, b) => (b.score || 0) - (a.score || 0));
+      });
       setLastRescore(new Date());
     } catch (e) {
       console.error('Rescore failed:', e);
@@ -106,8 +108,9 @@ const SpecialistDashboard = () => {
     navigate('/login');
   };
 
-  const criticalCount = triagedPatients.filter(p => p.triageLevel === '1' || p.triageLevel === '2').length;
-  const degradedCount = triagedPatients.filter(p => p.degraded).length;
+  const safePatients = Array.isArray(triagedPatients) ? triagedPatients : [];
+  const criticalCount = safePatients.filter(p => p.triageLevel === '1' || p.triageLevel === '2').length;
+  const degradedCount = safePatients.filter(p => p.degraded).length;
 
   return (
     <div className="min-h-screen bg-[#F7F5F2]">
@@ -141,7 +144,7 @@ const SpecialistDashboard = () => {
       <div className="max-w-5xl mx-auto px-6 py-8">
         <div className="grid grid-cols-4 gap-4 mb-6">
           {[
-            { label: 'Total tries', value: triagedPatients.length, color: 'text-[#2C3A52]' },
+            { label: 'Total tries', value: safePatients.length, color: 'text-[#2C3A52]' },
             { label: 'Critiques', value: criticalCount, color: 'text-[#D94F3D]' },
             { label: 'Degrades', value: degradedCount, color: 'text-[#D97706]' },
             {
@@ -201,7 +204,7 @@ const SpecialistDashboard = () => {
             Patients tries - classes par priorite
           </h2>
           <button
-            onClick={() => { fetchPatients(); runRescore(); }}
+            onClick={() => fetchPatients()}
             className="flex items-center gap-1.5 text-xs font-mono text-muted hover:text-[#2C3A52] transition-colors"
           >
             <RefreshCw size={12} />
@@ -209,7 +212,7 @@ const SpecialistDashboard = () => {
           </button>
         </div>
 
-        {triagedPatients.length === 0 ? (
+        {safePatients.length === 0 ? (
           <div className="text-center py-20">
             <Users size={32} className="text-muted/40 mx-auto mb-3" />
             <p className="text-muted font-mono text-sm">
@@ -232,7 +235,7 @@ const SpecialistDashboard = () => {
             </div>
 
             <div className="divide-y divide-[#E8E5E0]">
-              {triagedPatients.map(patient => {
+              {safePatients.map(patient => {
                 const color = TRIAGE_COLORS[patient.triageLevel]
                   || '#8A8785';
                 return (

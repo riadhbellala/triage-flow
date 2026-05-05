@@ -29,9 +29,16 @@ app.use(cors(corsOptions));
 app.options(/.*/, cors(corsOptions));
 
 // Connect to MongoDB
+console.log('Attempting MongoDB connection...');
+console.log('MONGO_URI starts with:', process.env.MONGO_URI?.substring(0, 40));
 mongoose.connect(process.env.MONGO_URI)
     .then(() => console.log('MongoDB Connected'))
-    .catch(err => console.log(err));
+    .catch(err => {
+      console.error('MongoDB connection FAILED:');
+      console.error('Error name:', err.name);
+      console.error('Error message:', err.message);
+      console.error('Full error:', err);
+    });
 
 // Routes
 app.use('/api/auth', require('./routes/auth'));

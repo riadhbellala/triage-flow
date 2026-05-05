@@ -15,6 +15,7 @@ router.post('/orientation', async (req, res) => {
     await patient.save();
     res.json({ success: true, ticket: ticket, patientId: patient._id });
   } catch (err) {
+    console.error('Orientation Error:', err);
     res.status(500).json({ success: false, message: 'Server error' });
   }
 });
@@ -102,9 +103,11 @@ router.post('/rescore', auth, async (req, res) => {
       const degraded = score > baseScore + 40;
 
       await Patient.findByIdAndUpdate(patient._id, {
-        score,
-        degraded,
-        waitMinutes: wait,
+        $set: {
+          score,
+          degraded,
+          waitMinutes: wait,
+        }
       });
 
       updated.push({
